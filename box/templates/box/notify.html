@@ -1,0 +1,21 @@
+{% extends "base_menu.html" %}
+{% block content %}
+<div>
+{% for product in notify_list %}
+<p>You'll be notified by email when {{ product.product__name }} reaches the price of {{ product.wanted_price }}$
+<a href="{% url 'box:nopeify' product.product__name %}"> (unsubscribe)</a>
+</p>
+{% endfor %}
+<form method="post" action="">
+{% csrf_token %}
+{{ form.as_p }}
+<label for="set_price">Wanted Price</label>
+<input type="number" id="set_price" name="wanted_price" /><br>
+{% for product in product_list %}
+<input type="radio" id="product_name" name="tracked_product" value="{{ product.name }}" />
+<label for="product_name">{{ product.name }} || {{ product.marketprice }}$</label><br>
+{% endfor %}
+<input type="submit" class="btn btn-primary" value="Notify me" />
+</form>
+</div>
+{% endblock %}

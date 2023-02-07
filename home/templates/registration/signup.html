@@ -1,0 +1,27 @@
+{% extends "base_bootstrap.html" %}
+
+{% block content %}
+{% load crispy_forms_tags %}
+
+{% if form.errors %}
+  <p>Your username and password didn't match. Please try again.</p>
+{% endif %}
+
+<form method="post" action="{% url 'box:signup' %}">
+{% csrf_token %}
+{{ form|crispy }}
+<br>
+<input type="submit" class="btn btn-primary" value="Sign up" />
+<input type="reset" class="btn btn-primary">
+<input type="hidden" name="next" value="{{ next }}" />
+</form>
+{% endblock %}
+<p>
+  The input type="hidden" defines a hidden input field (not visible to a user).
+
+A hidden field lets web developers include data that cannot be seen or modified by users when a form is submitted.
+
+A hidden field often stores what database record that needs to be updated when the form is submitted.
+
+Note: While the value is not displayed to the user in the page's content, it is visible (and can be edited) using any browser's developer tools or "View Source" functionality. Do not use hidden inputs as a form of security!
+</p>
