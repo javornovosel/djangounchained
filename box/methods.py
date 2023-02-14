@@ -56,10 +56,11 @@ def get_minimum(chosen_set):
 	return minimal_box_value
 
 
-def get_random_packs(chosen_set, number_of_packs):
+def get_random_packs(chosen_set, number_of_packs, draft = False):
 
 	cards_pulled = []
 	cards_opened = {}#rename, too similar to cards_pulled
+	pack_list = []
 	total_value = 0
 
 	leader = Card.objects.filter(rarity__rarity = 'Leader', card_set__set_name = chosen_set).values('marketprice', 'name','image_link', 'card_id')
@@ -71,6 +72,9 @@ def get_random_packs(chosen_set, number_of_packs):
 	manga = Card.objects.filter(rarity__rarity = 'Manga', card_set__set_name = chosen_set).values('marketprice', 'name','image_link', 'card_id')
 
 	for i in range(number_of_packs):
+		if draft == True:
+			cards_pulled = []
+
 		don = Card.objects.filter(rarity__rarity = 'DON!!', card_set__set_name = chosen_set).values('marketprice', 'name','image_link')
 		alternate_don = Card.objects.filter(rarity__rarity = 'Alternate DON!!', card_set__set_name = chosen_set).values('marketprice', 'name','image_link')
 		common = Card.objects.filter(rarity__rarity = 'Common', card_set__set_name = chosen_set).values('marketprice', 'name','image_link', 'card_id')
@@ -206,7 +210,11 @@ def get_random_packs(chosen_set, number_of_packs):
 				cards_pulled.append(random_rare)
 			total_value = total_value + random_rare['marketprice']
 
+		if draft == True:
+			pack_list.append(cards_pulled)
 
+	if draft == True:
+		return pack_list
 
 	for i in range(len(cards_pulled)):
 		for k,v in cards_opened.items():

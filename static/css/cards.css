@@ -1,0 +1,19 @@
+.main-container {
+  display: flex;
+  flex-wrap: wrap;
+}
+
+.card-container {
+    width: 10%;
+    margin: 10px;
+}
+
+.card-image {
+    width: 100%;
+}
+
+.card-text {
+    padding: 10px;
+}
+
+

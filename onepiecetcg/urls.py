@@ -14,11 +14,24 @@ Including another URLconf
     2. Add a URL to urlpatterns:  path('blog/', include('blog.urls'))
 """
 from django.contrib import admin
-from django.urls import path, include
+from django.urls import path, include, re_path
+from django.views.static import serve
+import os
 
 urlpatterns = [
     path('admin/', admin.site.urls),
     path('accounts/', include('django.contrib.auth.urls')),
     path('', include('box.urls')),
-    path('home', include('home.urls')),
+    path('home/', include('home.urls')),
+    path('draft/', include('draft.urls')),
+    #re_path(r'^', include(routing.websocket_urlpatterns))
+]
+
+BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+urlpatterns += [
+    path('favicon.ico', serve, {
+            'path': 'favicon.ico',
+            'document_root': os.path.join(BASE_DIR, 'static/'),
+        }
+    ),
 ]

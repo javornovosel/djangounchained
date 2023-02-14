@@ -34,6 +34,8 @@ ALLOWED_HOSTS = ['*'
 # Application definition
 
 INSTALLED_APPS = [
+    'daphne',
+
     'django.contrib.admin',
     'django.contrib.auth',
     'django.contrib.contenttypes',
@@ -49,7 +51,16 @@ INSTALLED_APPS = [
 
     'box.apps.BoxConfig',
     'home.apps.HomeConfig',
+    'draft.apps.DraftConfig',
 ]
+
+ASGI_APPLICATION = 'onepiecetcg.asgi.application'
+
+CHANNEL_LAYERS = {
+    'default': {
+            'BACKEND' : 'channels.layers.InMemoryChannelLayer' #in production use redis if on windows fuck redis do something else
+    }
+}
 
 MIDDLEWARE = [
     'django.middleware.security.SecurityMiddleware',

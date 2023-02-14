@@ -87,6 +87,12 @@ class OpeningView(View):
 
 		highest_ever = UserProduct.objects.values('highest_value_opened').order_by('-highest_value_opened')[0]
 
+		cntx = {
+				'card_list' : card_list,
+				'card_count' : card_count,
+				'total_value' : total_value,
+				'highest_ever': highest_ever['highest_value_opened'],
+				}
 
 		if request.user.is_anonymous is False:#vjerojatno ima bolji način
 			product_opened = get_object_or_404(Product, name=f'{chosen_set} Booster Box')
@@ -94,19 +100,7 @@ class OpeningView(View):
 			if current_highest.highest_value_opened < total_value:
 				current_highest.highest_value_opened = total_value
 				current_highest.save()
-				current_highest = current_highest.highest_value_opened
-
-
-		else:
-			current_highest = None
-
-		cntx = {
-				'card_list' : card_list,
-				'card_count' : card_count,
-				'total_value' : total_value,
-				'highest_ever': highest_ever['highest_value_opened'],
-				'highest_value':current_highest
-				}
+			cntx['highest_value'] = current_highest.highest_value_opened
 
 		return render(request, 'box/opening.html', cntx)
 

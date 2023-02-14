@@ -1,0 +1,95 @@
+{% extends "base_menu.html" %}
+{% block content %}
+
+<style>
+.main-container {
+  display: flex;
+  flex-wrap: wrap;
+}
+
+.pack-container.active{
+  display: flex;
+  flex-wrap: wrap;
+}
+
+.pack-container{
+  display: none;
+  flex-wrap: : wrap;
+}
+
+.card-container {
+    width: 10%;
+    margin: 10px;
+}
+
+.card-image {
+    width: 100%;
+}
+
+.card-text {
+    padding: 10px;
+}
+</style>
+
+<div id="messages"></div>
+<textarea id="chat-text" cols="50" rows="20"></textarea><br>
+<input id="input" type="text" size="53" name="message" /></br>
+<input id="submit" type="button" value="send" />
+
+<div class="main-container">
+{% for pack in pack_list %}
+
+<div class="pack-container" display="none">
+{% for card in pack %}
+
+<div class="card-container" id={{ card.card_id }}>
+  <img src={{ card.image_link }}  alt="example image" class="card-image">
+  <div class="card-text">{{ card.name }}</div>
+</div>
+{% endfor %}
+</div>
+{% endfor %}
+   
+
+{{ room_name|json_script:"room-name" }}
+{{ request.user.username|json_script:"user-username" }}
+
+<script type="text/javascript">
+	var pack = document.getElementsByClassName('pack-container');
+	for (var i = 0; i < pack.length; i++) {
+    pack[i].id = "pack" + (i + 1);
+	}
+
+	document.getElementById('pack1').classList.add('active');
+</script>
+
+<script type="text/javascript">
+	const userUsername = JSON.parse(document.getElementById('user-username').textContent);
+	const roomName = JSON.parse(document.getElementById('room-name').textContent);
+
+	url = `ws://${window.location.host}/ws/draft/lobby/` + roomName + '/'
+
+	var chatSocket = new WebSocket(url)
+	chatSocket.onmessage = function(e){
+		let data = JSON.parse(e.data)
+		console.log('tester message: ', data)
+
+		document.querySelector('#chat-text').value += (data.username + ': ' + data.message + '\n')
+	};
+
+	document.querySelector('#submit').onclick = function(e){
+		const messageInputDom = document.querySelector('#input');
+		const message = messageInputDom.value;
+		chatSocket.send(JSON.stringify({
+			'message':message,
+			'username':userUsername
+		}))
+		messageInputDom.value = '';
+	};
+
+</script>
+
+
+
+
+{% endblock %}

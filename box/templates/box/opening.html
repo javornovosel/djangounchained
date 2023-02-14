@@ -1,17 +1,6 @@
 {% extends "base_menu.html" %}
 {% block content %}
-<div>
-<p> highest value ever opened is {{ highest_ever }}</p>
-{% if user.is_authenticated %}
-<p> highest value you've opened is {{ highest_value }}</p>
-{% endif %}
-<p> value of cards opened is {{ total_value }}</p>
-<form action="{% url 'box:opening' %}" method="get">
-<label for="set">Romance Dawn</label>
-<input type="radio" id="set" name="set" value="Romance Dawn"><br>
-<input type="number" id ="number_of_packs" name="number_of_packs" min="1" max="24" step="1" value="24" />
-<input type="submit" class="btn btn-primary" value="Open Packs" /></a>
-</form>
+
 <style>
 .main-container {
   display: flex;
@@ -30,9 +19,21 @@
 .card-text {
     padding: 10px;
 }
-
-
 </style>
+
+<div>
+<p> highest value ever opened is {{ highest_ever }}</p>
+{% if user.is_authenticated %}
+<p> highest value you've opened is {{ highest_value }}</p>
+{% endif %}
+<p> value of cards opened is {{ total_value }}</p>
+<form action="{% url 'box:opening' %}" method="get">
+<label for="set">Romance Dawn</label>
+<input type="radio" id="set" name="set" value="Romance Dawn"><br>
+<input type="number" id ="number_of_packs" name="number_of_packs" min="1" max="24" step="1" value="24" />
+<input type="submit" class="btn btn-primary" value="Open Packs" /></a>
+</form>
+
 <div class="main-container">
 {% for card in card_list %}
 <div class="card-container">
