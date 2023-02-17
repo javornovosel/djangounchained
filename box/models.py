@@ -32,12 +32,18 @@ class Card(models.Model):
 	#in_stock = models.BooleanField
 
 	card_color = models.ManyToManyField('Color', through='CardColor')
+	card_draft = models.ManyToManyField(settings.AUTH_USER_MODEL, through='Draft', related_name='drafted_card')
 	card_type = models.ForeignKey(CardType, on_delete=models.CASCADE)
 	rarity = models.ForeignKey(Rarity, on_delete=models.CASCADE)
 	card_set = models.ForeignKey(CardSet, on_delete=models.CASCADE)
 
 	def __str__(self):
 		return "Card Name :" + str(self.name) + " Card ID: " + str(self.card_id)
+
+class Draft(models.Model):
+	card_count = models.IntegerField(default=0)
+	user = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE)
+	card = models.ForeignKey(Card, on_delete=models.CASCADE)
 
 class Product(models.Model):
 	name = models.CharField(max_length = 100, unique = True)

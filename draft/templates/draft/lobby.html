@@ -7,16 +7,14 @@
   flex-wrap: wrap;
 }
 
-.pack-container.active{
+.pack-container{
   display: flex;
   flex-wrap: wrap;
 }
-
-.pack-container{
-  display: none;
-  flex-wrap: : wrap;
+.draft-container{
+	display: flex;
+	flex-wrap: wrap;
 }
-
 .card-container {
     width: 10%;
     margin: 10px;
@@ -31,65 +29,133 @@
 }
 </style>
 
+{{ room_name|json_script:"room-name" }}
+{{ request.user.username|json_script:"user-username" }}
+
 <div id="messages"></div>
 <textarea id="chat-text" cols="50" rows="20"></textarea><br>
 <input id="input" type="text" size="53" name="message" /></br>
 <input id="submit" type="button" value="send" />
+<script type="text/javascript">
+		document.querySelector('#submit').onclick = function(e){
+		const messageInputDom = document.querySelector('#input');
+		const message = messageInputDom.value;
+		chatSocket.send(JSON.stringify({
+			'type' : 'chatroom_message',
+			'message' : message,
+			'username' : userUsername
+		}))
+		messageInputDom.value = '';
+	};
+</script>
 
-<div class="main-container">
-{% for pack in pack_list %}
-
-<div class="pack-container" display="none">
-{% for card in pack %}
-
-<div class="card-container" id={{ card.card_id }}>
-  <img src={{ card.image_link }}  alt="example image" class="card-image">
-  <div class="card-text">{{ card.name }}</div>
-</div>
-{% endfor %}
-</div>
-{% endfor %}
-   
-
-{{ room_name|json_script:"room-name" }}
-{{ request.user.username|json_script:"user-username" }}
+<input id="start-draft" type="button" value="Start Draft" />
 
 <script type="text/javascript">
-	var pack = document.getElementsByClassName('pack-container');
-	for (var i = 0; i < pack.length; i++) {
-    pack[i].id = "pack" + (i + 1);
-	}
+	document.querySelector('#start-draft').onclick = function(e){
+		chatSocket.send(JSON.stringify({
+			'type' : 'get_pack',
 
-	document.getElementById('pack1').classList.add('active');
+		}))
+	};
 </script>
+<h1>PACK </h1>
+<div class="main-container">
+<div class="pack-container"></div></div>
+   
+<h1>DRAFTED CARDS</h1>
+<div class="draft-container"></div>
+
+
 
 <script type="text/javascript">
 	const userUsername = JSON.parse(document.getElementById('user-username').textContent);
 	const roomName = JSON.parse(document.getElementById('room-name').textContent);
+	var activePack = document.querySelector('.pack-container');
+	var userDraft = document.querySelector('.draft-container');
 
 	url = `ws://${window.location.host}/ws/draft/lobby/` + roomName + '/'
 
-	var chatSocket = new WebSocket(url)
+	chatSocket = new WebSocket(url)
 	chatSocket.onmessage = function(e){
 		let data = JSON.parse(e.data)
-		console.log('tester message: ', data)
+		if (data.type === 'chatroom_message'){
+			document.querySelector('#chat-text').value += (data.username + ': ' + data.message + '\n')
+		}
+		if (data.type === 'draft_choice' ) {
+			console.log(data.drafted_card_id)
+    		var draftedCard = activePack.querySelector(`#${data.drafted_card_id}`);
+       		draftedCard.remove();
+       		document.querySelector('#chat-text').value += (data.username + ' has picked ' + data.drafted_card_name + '\n') 
 
-		document.querySelector('#chat-text').value += (data.username + ': ' + data.message + '\n')
+       		if (data.username === userUsername){
+       			let draftedCard = document.createElement('div');
+				draftedCard.className = 'card-container';
+       			let draftedImage = document.createElement('img');
+       			draftedImage.src = data.drafted_card_image; 
+       			draftedImage.className = 'card-image';
+
+  				let draftedName = document.createElement('div');
+  				draftedName.textContent = data.drafted_card_name;
+  				draftedName.className = 'card-text';
+
+  				userDraft.appendChild(draftedCard);
+       			draftedCard.appendChild(draftedImage);
+       			draftedCard.appendChild(draftedName);
+
+       		}
+
+    		
+		}
+		if (data.type === 'get_pack'){
+			console.log(data.card_list);
+			for (let card of data.card_list){
+				let cardName = card.name;
+				let cardId = card.card_id;
+				let cardImageLink = card.image_link;
+				console.log(cardName, cardId, cardImageLink)
+				let divCard = document.createElement('div');
+				divCard.className = 'card-container';
+				divCard.id = cardId;
+				divCard.addEventListener('click', function() {
+					pickCard(cardId, cardName, cardImageLink);
+				});
+				
+
+				let imgContainer = document.createElement('img');
+				imgContainer.src = cardImageLink;
+				imgContainer.alt = cardName;
+				imgContainer.className = 'card-image';
+				
+
+				let divCardText = document.createElement('div');
+				divCardText.className = 'card-text';
+				divCard.textContent = cardName;
+
+				activePack.appendChild(divCard);
+				divCard.appendChild(imgContainer);
+				divCard.appendChild(divCardText);
+				
+
+			}
+
+		}
 	};
 
-	document.querySelector('#submit').onclick = function(e){
-		const messageInputDom = document.querySelector('#input');
-		const message = messageInputDom.value;
-		chatSocket.send(JSON.stringify({
-			'message':message,
-			'username':userUsername
-		}))
-		messageInputDom.value = '';
-	};
+	    function pickCard(cardId, cardName, cardImageLink) {
+	    console.log(cardId)
+    	chatSocket.send(JSON.stringify({
+    		'type' : 'draft_choice',
+    		'username' : userUsername,
+    		'drafted_card_name' : cardName,
+    		'drafted_card_id' : cardId,
+    		'drafted_card_image' : cardImageLink
+
+    	}));	
+    }
 
 </script>
 
 
-
-
 {% endblock %}
+
